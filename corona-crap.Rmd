@@ -1,0 +1,59 @@
+---
+title: "Corona-Crap"
+author: "André Calero Valdez"
+date: "5/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(ggthemes)
+library(viridis)
+
+
+# Daten gefunden bei: https://www.arcgis.com/home/item.html?id=f10774f1c63e40168479a1feb6c7ca74
+raw <- read_csv("https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data") %>% 
+  mutate(Meldedatum = as_date(Meldedatum))
+
+meldestand <- max(raw$Datenstand)
+
+selection <- raw %>% 
+  filter(str_detect(Landkreis, c("Aachen","Köln", "Berlin Mitte")))
+
+
+
+## Recoding selection$Landkreis
+selection$Landkreis <- fct_recode(selection$Landkreis,
+               "Köln" = "SK Köln",
+               "Städteregion Aachen" = "StadtRegion Aachen",
+               "Berlin Mitte" = "SK Berlin Mitte")
+
+
+selection %>%   
+  group_by(Landkreis, Meldedatum) %>% 
+  summarise(AnzahlFall = sum(AnzahlFall)) %>% 
+  ggplot() +
+  aes(x = Meldedatum, y = AnzahlFall, fill = Landkreis) +
+  geom_col() + 
+  facet_wrap(~Landkreis) +
+  labs(x = "Meldedatum", y = "Anzahl gemeldeter Fälle",
+         title = "Vergleich der Neuinfektionen zwischen Aachen und Köln",
+         subtitle = "Beide Landkreise zeigen einen Rückgang der Infektionen",
+         caption = paste("Daten vom RKI, Meldestand:", meldestand)) +
+  scale_x_date(date_labels = "%d.%m.", date_breaks = "1 month") +
+  scale_fill_manual(values = c("#67A8FF", "#FF8C80", "#9CB33E")) +
+  theme_tufte(base_family = "Arial") +
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    panel.grid.major = element_blank(), # get rid of major grid
+    panel.grid.minor = element_blank(), # get rid of minor grid
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )
+
+ggsave("plot.png", width = 7, height = 4, dpi = 600, bg = "transparent")
+```
+
