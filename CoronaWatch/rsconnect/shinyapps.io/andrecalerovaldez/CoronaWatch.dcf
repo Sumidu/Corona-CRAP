@@ -1,0 +1,13 @@
+name: CoronaWatch
+title: CoronaWatch
+username:
+account: andrecalerovaldez
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2932501
+bundleId: 3802263
+url: https://andrecalerovaldez.shinyapps.io/CoronaWatch/
+when: 1604089759.83364
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: local.local
